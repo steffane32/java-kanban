@@ -11,14 +11,13 @@ public class Main {
         SubTask subTask1 = new SubTask(4, "Подзадача 1", "Описание подзадачи 1", Status.NEW);
         SubTask subTask2 = new SubTask(5, "Подзадача 2", "Описание подзадачи 2", Status.DONE);
 
-        epic1.addSubTask(subTask1);
-        epic1.addSubTask(subTask2);
+        epic1.addSubTask(subTask1.getId());
+        epic1.addSubTask(subTask2.getId()); // Используем ID подзадачи
 
         // ТЕСТИРОВАНИЕ_3 Создаём второй эпик с одной подзадачей
         Epic epic2 = new Epic(6, "Эпик 2", "Описание эпика 2", Status.NEW);
         SubTask subTask3 = new SubTask(7, "Подзадача 3", "Описание подзадачи 3", Status.IN_PROGRESS);
-
-        epic2.addSubTask(subTask3);
+        epic2.addSubTask(subTask3.getId());
 
         // ТЕСТИРОВАНИЕ_4 Добавляем задачи и эпики в менеджер
         taskManager.createTask(task1);

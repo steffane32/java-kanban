@@ -1,5 +1,5 @@
 public class SubTask extends Tasks {
-    private int epicId;
+    private static int  epicId;
 
     public SubTask(int id, String name, String description, Status status) {
         super(id, name, description, status);
@@ -9,7 +9,7 @@ public class SubTask extends Tasks {
         this.epicId = epicId;
     }
 
-    public int getEpicId() {
+    public static int getEpicId() {
         return epicId;
     }
 }

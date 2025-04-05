@@ -1,10 +1,15 @@
 import java.util.Objects;
 
 class Tasks {
-    private final int id; // Сделаем id финальным
+
+    protected int id;
     private String name;
     private String description;
     private Status status;
+
+    public void setId(int id) {
+        this.id = id;
+    }
 
     public int getId() {
         return id;
