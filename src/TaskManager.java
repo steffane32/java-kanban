@@ -55,11 +55,10 @@ public class TaskManager {
         List<Integer> subtasks = epicSubtasks.get(epicId);
         if (subtasks == null || subtasks.isEmpty()) {
             if (epics.containsKey(epicId)) {
-                epics.get(epicId).setStatus(Status.NEW);
+                epics.get(epicId).setStatus(Status.NEW); // Устанавливаем статус NEW, если нет подзадач
             }
             return;
         }
-
         boolean allNew = true;
         boolean allDone = true;
 
