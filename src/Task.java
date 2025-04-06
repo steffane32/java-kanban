@@ -1,18 +1,28 @@
 import java.util.Objects;
 
-class Tasks {
-
-    protected int id;
+public class Task {
+    private int id;
     private String name;
     private String description;
     private Status status;
 
-    public void setId(int id) {
+    public Task(int id, String name, String description, Status status) {
         this.id = id;
+        this.name = name;
+        this.description = description;
+        this.status = status;
+    }
+
+    public Task(String name, String description, Status status) {
+        this(0, name, description, status);
     }
 
     public int getId() {
         return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     public String getName() {
@@ -39,18 +49,12 @@ class Tasks {
         this.status = status;
     }
 
-    public Tasks(int id, String name, String description, Status status) {
-        this.id = id;
-        this.name = name;
-        this.description = description;
-        this.status = status;
-    }
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (!(obj instanceof Tasks)) return false;
-        Tasks other = (Tasks) obj;
-        return id == other.id;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Task task = (Task) o;
+        return id == task.id;
     }
 
     @Override
@@ -60,11 +64,11 @@ class Tasks {
 
     @Override
     public String toString() {
-        return "Tasks{" +
+        return "Task{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
                 ", description='" + description + '\'' +
                 ", status=" + status +
                 '}';
     }
-    }
+}
