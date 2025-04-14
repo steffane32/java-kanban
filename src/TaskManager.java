@@ -27,7 +27,6 @@ public interface TaskManager {
 
     // Общие методы
     List<SubTask> getSubtasksForEpic(int epicId);
-    void updateEpicStatus(int epicId); // Реализация будет в классе
 
     // Метод просмотра истории
     List<Task> getHistory();

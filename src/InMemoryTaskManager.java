@@ -5,7 +5,6 @@ public class InMemoryTaskManager implements TaskManager {
     private final Map<Integer, Epic> epics = new HashMap<>();
     private final Map<Integer, SubTask> subtasks = new HashMap<>();
     private int nextId = 1;
-    private final LinkedList<Task> history = new LinkedList<>(); // Для хранения истории
     private static final int MAX_HISTORY_SIZE = 10; // Лимит ист
     private final HistoryManager historyManager;
 
@@ -137,8 +136,8 @@ public class InMemoryTaskManager implements TaskManager {
             nextId = 1;
         }
 
-        @Override
-        public void updateEpicStatus ( int epicId){
+
+        private void updateEpicStatus ( int epicId){
             Epic epic = epics.get(epicId);
             if (epic == null) return;
 
@@ -163,20 +162,15 @@ public class InMemoryTaskManager implements TaskManager {
             else if (allDone) epic.setStatus(Status.DONE);
             else epic.setStatus(Status.IN_PROGRESS);
         }
+
         @Override
         public List<Task> getHistory () {
-            return new ArrayList<>(history); // Возвращаем копию
+            return new ArrayList<>(); // Возвращаем копию
         }
 
-        private void addToHistory (Task task){
-            history.addFirst(task); // Добавляем в начало
-            if (history.size() > MAX_HISTORY_SIZE) {
-                history.removeLast(); // Удаляем самый старый элемент
-            }
-        }
 
         // Модифицируем методы получения задач
-        // @Override
+        @Override
         public Task getTaskById ( int id){
             Task task = tasks.get(id);
             if (task != null) historyManager.add(task);

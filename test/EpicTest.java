@@ -1,6 +1,6 @@
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
 
 class EpicTest {
     private TaskManager manager;
@@ -18,7 +18,7 @@ class EpicTest {
     @Test
     void epicStatusShouldUpdateToDoneWhenSubtaskDone() {
         // Проверяем начальный статус
-        assertEquals(Status.NEW, epic.getStatus(),
+        Assertions.assertEquals(Status.NEW, epic.getStatus(),
                 "Созданный эпик с подзадачей NEW должен иметь статус NEW");
 
         // Изменяем статус подзадачи
@@ -26,7 +26,7 @@ class EpicTest {
         manager.updateSubtask(subtask);
 
         // Проверяем обновлённый статус эпика
-        assertEquals(Status.DONE, manager.getEpicById(epic.getId()).getStatus(),
+        Assertions.assertEquals(Status.DONE, manager.getEpicById(epic.getId()).getStatus(),
                 "Статус эпика должен измениться на DONE, когда все подзадачи выполнены");
     }
 }
