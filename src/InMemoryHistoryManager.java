@@ -10,10 +10,9 @@ public class InMemoryHistoryManager implements HistoryManager {
 
         //history.remove(task); // Удаляем старое вхождение (если есть)
         history.addFirst(task);
-
-        //if (history.size() > MAX_HISTORY_SIZE) {
-         //   history.removeLast();
-        //}
+        if (history.size() > MAX_HISTORY_SIZE) {
+            history.removeLast();
+        }
     }
 
     @Override

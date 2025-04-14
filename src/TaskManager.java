@@ -8,7 +8,7 @@ public interface TaskManager {
     Task createTask(Task task);
     void updateTask(Task task);
     void deleteTaskById(int id);
-
+    void clearAll ();
     // Методы для Epic
     List<Epic> getAllEpics();
     void deleteAllEpics();
