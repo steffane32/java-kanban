@@ -8,23 +8,17 @@ class HistoryManagerTest {
     private final TaskManager manager = Managers.getDefault();
 
     @Test
-    void shouldPreserveTaskDataInHistory() {
-        // Создаем задачу и добавляем в историю
+    void shouldKeepLastVersionInHistory() {
         Task original = manager.createTask(new Task("Task", "Desc", Status.NEW));
         history.add(original);
 
-        // Изменяем задачу и снова добавляем
         original.setStatus(Status.DONE);
         history.add(original);
 
-        // Получаем историю
         List<Task> historyList = history.getHistory();
 
-        // Проверяем
-        assertEquals(2, historyList.size(), "В истории должно быть 2 записи");
-        assertEquals(Status.NEW, historyList.get(0).getStatus(),
-                "Первая запись должна сохранять исходный статус");
-        assertEquals(Status.DONE, historyList.get(1).getStatus(),
-                "Вторая запись должна содержать обновленный статус");
+        assertEquals(1, historyList.size()); // Теперь ожидаем 1 запись
+        assertEquals(Status.DONE, historyList.get(0).getStatus());
+
     }
 }
