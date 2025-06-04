@@ -23,5 +23,18 @@ public class Main {
         System.out.println("История после удаления: " + manager.getHistory().size()); // Должно быть 0
 
 
-    }
-}
+
+        manager.createTask(task);
+
+                // Проверка истории
+        manager.getTaskById(task.getId()); // Добавляем
+        manager.getTaskById(task.getId()); // Обновляем
+        System.out.println(manager.getHistory().size()); // 1
+
+                // Проверка порядка
+        Task task2 = new Task("Test2", "Desc", Status.NEW);
+        manager.createTask(task2);
+        manager.getTaskById(task2.getId());
+        System.out.println(manager.getHistory()); // [task2, task]
+            }
+        }
