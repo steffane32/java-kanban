@@ -8,7 +8,7 @@ public class InMemoryHistoryManager implements HistoryManager {
     public void add(Task task) {
         if (task == null) return;
 
-        //history.remove(task); // Удаляем старое вхождение (если есть)
+        history.remove(task); // Удаляем старое вхождение (если есть)
         history.addFirst(task);
         if (history.size() > MAX_HISTORY_SIZE) {
             history.removeLast();
@@ -20,8 +20,8 @@ public class InMemoryHistoryManager implements HistoryManager {
         return new ArrayList<>(history); // Возвращаем копию
     }
 
-//    @Override
-//    public void remove(int id) {
-//        history.removeIf(task -> task.getId() == id);
-//    }
+   @Override
+   public void remove(int id) {
+        history.removeIf(task -> task.getId() == id);
+   }
 }

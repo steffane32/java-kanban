@@ -1,9 +1,27 @@
-
-//Привет, поправила, лишние методы закомментировала, не поняла, что их не надо реализовывать в запаре
-//тесты добавила в отдельную папку и сделала рефакторинг, все должно работать, с историей вроде тоже разобралась,
-// насколько поняла проблему О_о если что не так - напиши чуть подробнее, пожалуйста могу сегодня подтупливать
-
+// для самопроверки
 public class Main {
     public static void main(String[] args) {
+        TaskManager manager = Managers.getDefault();
+
+        // Создаем задачу
+        Task task = new Task("Test", "Description", Status.NEW);
+        manager.createTask(task);
+
+        // Проверяем до просмотра
+        System.out.println("История до просмотра: " + manager.getHistory().size()); // Должно быть 0
+
+        // Просматриваем задачу
+        manager.getTaskById(task.getId());
+        System.out.println("История после просмотра: " + manager.getHistory().size()); // Должно быть 1
+
+        // Просматриваем ещё раз
+        manager.getTaskById(task.getId());
+        System.out.println("История после повторного просмотра: " + manager.getHistory().size()); // Должно остаться 1
+
+        // Удаляем задачу
+        manager.deleteTaskById(task.getId());
+        System.out.println("История после удаления: " + manager.getHistory().size()); // Должно быть 0
+
+
     }
 }
