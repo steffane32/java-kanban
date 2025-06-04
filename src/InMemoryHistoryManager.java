@@ -20,8 +20,8 @@ public class InMemoryHistoryManager implements HistoryManager {
         return new ArrayList<>(history); // Возвращаем копию
     }
 
-    @Override
-    public void remove(int id) {
-        history.removeIf(task -> task.getId() == id);
-    }
+//    @Override
+//    public void remove(int id) {
+//        history.removeIf(task -> task.getId() == id);
+//    }
 }
