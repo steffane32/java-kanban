@@ -12,12 +12,12 @@ public class InMemoryTaskManager implements TaskManager {
     }
     // Методы для Task
     @Override
-    public List<Task> getAllTasks () {
+    public List<Task> getAllTasks() {
         return new ArrayList<>(tasks.values());
     }
 
     @Override
-    public void deleteAllTasks () {
+    public void deleteAllTasks() {
         tasks.clear();
     }
 
