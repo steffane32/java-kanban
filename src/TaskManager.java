@@ -14,7 +14,7 @@ public interface TaskManager {
 
     void deleteTaskById(int id);
 
-    void clearAll ();
+    void clearAll();
     // Методы для Epic
 
     List<Epic> getAllEpics();
