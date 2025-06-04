@@ -7,7 +7,6 @@ public class InMemoryHistoryManager implements HistoryManager {
     @Override
     public void add(Task task) {
         if (task == null) return;
-
         history.remove(task); // Удаляем старое вхождение (если есть)
         history.addFirst(task);
         if (history.size() > MAX_HISTORY_SIZE) {
