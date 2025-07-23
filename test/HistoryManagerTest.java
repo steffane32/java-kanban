@@ -5,15 +5,16 @@ import java.util.List;
 
 class HistoryManagerTest {
     private final HistoryManager history = Managers.getDefaultHistory();
-    private final TaskManager manager = Managers.getDefault();
 
     @Test
     void shouldPreserveTaskDataInHistory() {
-        // Создаем задачу и добавляем в историю
-        Task original = manager.createTask(new Task("Task", "Desc", Status.NEW));
+        // Создаем задачу
+        Task original = new Task(1, "Task", "Desc", Status.NEW);
+
+        // Добавляем в историю первый раз
         history.add(original);
 
-        // Изменяем задачу и снова добавляем
+        // Изменяем задачу и добавляем снова
         original.setStatus(Status.DONE);
         history.add(original);
 
