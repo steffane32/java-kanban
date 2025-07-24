@@ -83,7 +83,9 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
     private static Task fromString(String value) {
         String[] parts = value.split(",");
-        if (parts.length < 5) return null;
+        if (parts.length < 5) {
+            throw new IllegalArgumentException("Некорректные данные у задачи");
+        }
 
         int id = Integer.parseInt(parts[0]);
         String type = parts[1];
@@ -97,10 +99,13 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             case "EPIC":
                 return new Epic(id, name, description, status);
             case "SUBTASK":
-                int epicId = parts.length > 5 ? Integer.parseInt(parts[5]) : 0;
+                if (parts.length < 6) {
+                    throw new IllegalArgumentException("Не указан epicId для подзадачи");
+                }
+                int epicId = Integer.parseInt(parts[5]);
                 return new SubTask(id, name, description, status, epicId);
             default:
-                return null;
+                throw new IllegalArgumentException("Неверный тип задачи: " + type);
         }
     }
 
