@@ -9,12 +9,8 @@ public class InMemoryHistoryManager implements HistoryManager {
     public void add(Task task) {
         if (task == null) return;
 
-        // Удаляем старую версию задачи (если есть)
-        remove(task.getId());
-
-        // Создаем копию задачи для сохранения в истории
-        Task taskCopy = copyTask(task);
-        history.add(taskCopy);
+        // Всегда добавляем новую копию (не заменяем существующую)
+        history.add(copyTask(task));
 
         if (history.size() > MAX_HISTORY_SIZE) {
             history.remove(0);
