@@ -5,10 +5,10 @@ import java.util.List;
 import java.util.Map;
 
 public class InMemoryTaskManager implements TaskManager {
-    private final Map<Integer, Task> tasks = new HashMap<>();
-    private final Map<Integer, Epic> epics = new HashMap<>();
-    private final Map<Integer, SubTask> subtasks = new HashMap<>();
-    private int nextId = 1;
+    protected int nextId = 1;  // Изменено на protected
+    protected final Map<Integer, Task> tasks = new HashMap<>();
+    protected final Map<Integer, Epic> epics = new HashMap<>();
+    protected final Map<Integer, SubTask> subtasks = new HashMap<>();
     private final HistoryManager historyManager;
 
     public InMemoryTaskManager(HistoryManager historyManager) {

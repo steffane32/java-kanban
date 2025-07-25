@@ -1,18 +1,18 @@
+import java.io.File;
+
 public class Managers {
     private Managers() {
-        // Приватный конструктор, чтобы нельзя было создать экземпляр класса
+        // Приватный конструктор
     }
 
-    /**
-     * Возвращает реализацию TaskManager по умолчанию (в памяти)
-     */
     public static TaskManager getDefault() {
         return new InMemoryTaskManager(getDefaultHistory());
     }
 
-    /**
-     * Возвращает реализацию HistoryManager по умолчанию (пригодится позже)
-     */
+    public static TaskManager getFileBackedTaskManager(File file) {
+        return new FileBackedTaskManager(file, getDefaultHistory());
+    }
+
     public static HistoryManager getDefaultHistory() {
         return new InMemoryHistoryManager();
     }
