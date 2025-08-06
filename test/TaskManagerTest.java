@@ -44,7 +44,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
 
     @Test
     void shouldCreateEpicWithSubtasks() {
-        Epic epic = manager.createEpic(new Epic("Epic", "Desc", Status.NEW));
+        Epic epic = manager.createEpic(new Epic(0,"Epic", "Desc", Status.NEW));
         SubTask sub = manager.createSubtask(new SubTask("Sub", "Desc", Status.NEW, epic.getId()));
 
         assertEquals(epic.getId(), sub.getEpicId());
@@ -53,7 +53,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
 
     @Test
     void shouldUpdateEpicStatus() {
-        Epic epic = manager.createEpic(new Epic("Epic", "Desc", Status.NEW));
+        Epic epic = manager.createEpic(new Epic(0,"Epic", "Desc", Status.NEW));
         SubTask sub = manager.createSubtask(new SubTask("Sub", "Desc", Status.NEW, epic.getId()));
 
         // NEW -> IN_PROGRESS
@@ -96,12 +96,12 @@ abstract class TaskManagerTest<T extends TaskManager> {
 
     @Test
     void shouldHandleEpicTimings() {
-        Epic epic = manager.createEpic(new Epic("Epic", "Desc", Status.NEW));
+        Epic epic = manager.createEpic(new Epic(0,"Epic", "Desc", Status.NEW));
         LocalDateTime start = LocalDateTime.now();
 
-        SubTask sub1 = manager.createSubtask(new SubTask("Sub1", "Desc", Status.NEW,
+        SubTask sub1 = manager.createSubtask(new SubTask(0,"Sub1", "Desc", Status.NEW,
                 epic.getId(), Duration.ofHours(1), start));
-        SubTask sub2 = manager.createSubtask(new SubTask("Sub2", "Desc", Status.NEW,
+        SubTask sub2 = manager.createSubtask(new SubTask(0,"Sub2", "Desc", Status.NEW,
                 epic.getId(), Duration.ofHours(2), start.plusHours(1)));
 
         assertEquals(start, epic.getStartTime());

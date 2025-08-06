@@ -1,4 +1,4 @@
-import java.time.Duration;
+//import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -265,35 +265,9 @@ public class InMemoryTaskManager implements TaskManager {
         }
 
         List<SubTask> subtasksList = getSubtasksForEpic(epicId);
-        if (subtasksList.isEmpty()) {
-            epic.setStartTime(null);
-            epic.setDuration(null);
-            return;
-        }
-
-        LocalDateTime earliestStart = null;
-        LocalDateTime latestEnd = null;
-        long totalDuration = 0;
-
-        for (SubTask subtask : subtasksList) {
-            if (subtask.getStartTime() != null) {
-                if (earliestStart == null || subtask.getStartTime().isBefore(earliestStart)) {
-                    earliestStart = subtask.getStartTime();
-                }
-
-                LocalDateTime subtaskEnd = subtask.getEndTime();
-                if (latestEnd == null || subtaskEnd.isAfter(latestEnd)) {
-                    latestEnd = subtaskEnd;
-                }
-            }
-            if (subtask.getDuration() != null) {
-                totalDuration += subtask.getDuration().toMinutes();
-            }
-        }
-
-        epic.setStartTime(earliestStart);
-        epic.setDuration(Duration.ofMinutes(totalDuration));
+        epic.updateTimings(subtasksList);
     }
+
 
     protected void addToPrioritizedTasks(Task task) {
         if (task.getStartTime() != null) {
@@ -312,12 +286,15 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     private void validateTaskTime(Task newTask) {
-        if (newTask.getStartTime() == null) {
+        if (newTask.getStartTime() == null || newTask.getDuration() == null) {
             return;
         }
 
         for (Task existingTask : getPrioritizedTasksSet()) {
-            if (existingTask.getId() != newTask.getId() && isTimeOverlapping(newTask, existingTask)) {
+            if (existingTask.getId() != newTask.getId() &&
+                    existingTask.getStartTime() != null &&
+                    existingTask.getDuration() != null &&
+                    isTimeOverlapping(newTask, existingTask)) {
                 throw new ManagerSaveException(
                         "Задача пересекается по времени с существующей задачей",
                         new IllegalStateException("Временной конфликт между задачами")

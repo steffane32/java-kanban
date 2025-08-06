@@ -1,4 +1,3 @@
-// Epic.java
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -9,7 +8,7 @@ public class Epic extends Task {
     private LocalDateTime endTime;
 
     public Epic(int id, String name, String description, Status status) {
-        super(id, name, description, status, Duration.ZERO, null);
+        super(id, name, description, status);
         this.subtaskIds = new ArrayList<>();
     }
 
@@ -17,7 +16,7 @@ public class Epic extends Task {
         if (subtasks.isEmpty()) {
             setDuration(Duration.ZERO);
             setStartTime(null);
-            endTime = null;
+            this.endTime = null;
             return;
         }
 
@@ -36,7 +35,9 @@ public class Epic extends Task {
                     latestEnd = subtaskEnd;
                 }
             }
-            totalDuration += subtask.getDuration().toMinutes();
+            if (subtask.getDuration() != null) {
+                totalDuration += subtask.getDuration().toMinutes();
+            }
         }
 
         setStartTime(earliestStart);
@@ -49,13 +50,14 @@ public class Epic extends Task {
         return endTime;
     }
 
-
     public List<Integer> getSubtaskIds() {
-        return subtaskIds;
+        return new ArrayList<>(subtaskIds);
     }
 
     public void addSubtaskId(int subtaskId) {
-        subtaskIds.add(subtaskId);
+        if (!subtaskIds.contains(subtaskId)) {
+            subtaskIds.add(subtaskId);
+        }
     }
 
     public void removeSubtaskId(int subtaskId) {

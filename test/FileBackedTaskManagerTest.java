@@ -13,7 +13,7 @@ class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskManager> {
         try {
             tempFile = File.createTempFile("tasks", ".csv");
             tempFile.deleteOnExit();
-            return FileBackedTaskManager.loadFromFile(tempFile, Managers.getDefaultHistory());
+            return new FileBackedTaskManager(tempFile, Managers.getDefaultHistory());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -21,15 +21,18 @@ class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskManager> {
 
     @Test
     void shouldSaveAndLoadFromFile() {
-        Task task = manager.createTask(new Task("Task", "Desc", Status.NEW));
-        Epic epic = manager.createEpic(new Epic("Epic", "Desc", Status.NEW));
-        manager.createSubtask(new SubTask("Sub", "Desc", Status.NEW, epic.getId()));
+        Task task = manager.createTask(new Task(0, "Task", "Desc", Status.NEW));
+        Epic epic = manager.createEpic(new Epic(0, "Epic", "Desc", Status.NEW));
+        SubTask sub = manager.createSubtask(new SubTask(0, "Sub", "Desc", Status.NEW, epic.getId()));
 
         FileBackedTaskManager loaded = FileBackedTaskManager.loadFromFile(tempFile, Managers.getDefaultHistory());
 
         assertEquals(1, loaded.getAllTasks().size());
         assertEquals(1, loaded.getAllEpics().size());
         assertEquals(1, loaded.getAllSubtasks().size());
+        assertEquals(task.getName(), loaded.getTaskById(task.getId()).getName());
+        assertEquals(epic.getName(), loaded.getEpicById(epic.getId()).getName());
+        assertEquals(sub.getName(), loaded.getSubtaskById(sub.getId()).getName());
     }
 
     @Test
