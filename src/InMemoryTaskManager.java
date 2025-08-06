@@ -295,8 +295,7 @@ public class InMemoryTaskManager implements TaskManager {
                     isTimeOverlapping(newTask, existingTask)) {
                 throw new IllegalStateException(
                         "Задача пересекается по времени с существующей задачей: " +
-                                "Новая задача: " + newTask +
-                                ", Существующая задача: " + existingTask
+                                newTask + " пересекается с " + existingTask
                 );
             }
         }
