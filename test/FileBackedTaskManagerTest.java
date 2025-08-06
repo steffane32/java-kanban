@@ -2,7 +2,9 @@
 import org.junit.jupiter.api.Test;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
+import java.time.Duration;
+import java.time.LocalDateTime;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskManager> {
@@ -41,5 +43,17 @@ class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskManager> {
         assertThrows(IllegalArgumentException.class,
                 () -> FileBackedTaskManager.loadFromFile(invalid, Managers.getDefaultHistory()),
                 "Ожидалось IllegalArgumentException при попытке загрузить из несуществующего файла");
+    }
+
+    @Test
+    void shouldDetectTimeOverlaps() {
+        LocalDateTime now = LocalDateTime.now();
+        Task task1 = new Task(0, "Task1", "Desc", Status.NEW,
+                Duration.ofHours(1), now);
+        Task task2 = new Task(0, "Task2", "Desc", Status.NEW,
+                Duration.ofHours(2), now.plusMinutes(30));
+
+        manager.createTask(task1);
+        assertThrows(IllegalStateException.class, () -> manager.createTask(task2));
     }
 }

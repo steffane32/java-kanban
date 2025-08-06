@@ -93,7 +93,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
                 Duration.ofHours(2), now.plusMinutes(30));
 
         manager.createTask(task1);
-        assertThrows(IllegalArgumentException.class, () -> manager.createTask(task2));
+        assertThrows(IllegalStateException.class, () -> manager.createTask(task2));
     }
 
     @Test

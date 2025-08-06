@@ -278,10 +278,6 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     private void validateTaskTime(Task newTask) {
-        if (newTask.getStartTime() == null || newTask.getDuration() == null) {
-            return;
-        }
-
         for (Task existingTask : getPrioritizedTasksList()) {
             if (existingTask.getId() != newTask.getId() &&
                     isTimeOverlapping(newTask, existingTask)) {
