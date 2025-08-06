@@ -1,6 +1,6 @@
+// HistoryManagerTest.java
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
-
 import java.util.List;
 
 class HistoryManagerTest {
@@ -8,24 +8,16 @@ class HistoryManagerTest {
 
     @Test
     void shouldPreserveTaskDataInHistory() {
-        // Создаем задачу
         Task original = new Task(1, "Task", "Description", Status.NEW);
-
-        // Добавляем в историю первый раз (NEW)
         history.add(original);
 
-        // Изменяем задачу и добавляем снова (DONE)
-        original.setStatus(Status.DONE);
-        history.add(original);
+        Task modified = new Task(1, "Task", "Description", Status.DONE);
+        history.add(modified);
 
         List<Task> historyList = history.getHistory();
-
-        // Проверяем, что сохранились оба состояния
-        assertEquals(2, historyList.size(), "В истории должно быть 2 записи");
-        assertEquals(Status.NEW, historyList.get(0).getStatus(),
-                "Первая запись должна сохранять исходный статус NEW");
-        assertEquals(Status.DONE, historyList.get(1).getStatus(),
-                "Вторая запись должна содержать статус DONE");
+        assertEquals(2, historyList.size());
+        assertEquals(Status.NEW, historyList.get(0).getStatus());
+        assertEquals(Status.DONE, historyList.get(1).getStatus());
     }
 
     @Test
@@ -56,7 +48,6 @@ class HistoryManagerTest {
 
     @Test
     void shouldLimitHistorySize() {
-        // Заполняем историю сверх лимита
         for (int i = 1; i <= 15; i++) {
             history.add(new Task(i, "Task" + i, "Desc", Status.NEW));
         }
@@ -70,7 +61,6 @@ class HistoryManagerTest {
         Task original = new Task(1, "Original", "Desc", Status.NEW);
         history.add(original);
 
-        // Меняем оригинальную задачу
         original.setStatus(Status.DONE);
 
         Task fromHistory = history.getHistory().get(0);
