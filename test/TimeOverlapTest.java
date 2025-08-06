@@ -13,7 +13,7 @@ class TimeOverlapTest {
         Task task2 = new Task(0, "Task2", "Desc", Status.NEW, Duration.ofHours(1), now);
 
         manager.createTask(task1);
-        assertThrows(IllegalStateException.class, () -> manager.createTask(task2));
+        assertThrows(IllegalArgumentException.class, () -> manager.createTask(task2));
     }
 
     @Test
@@ -23,7 +23,7 @@ class TimeOverlapTest {
         Task task2 = new Task(0, "Task2", "Desc", Status.NEW, Duration.ofHours(2), now.plusHours(1));
 
         manager.createTask(task1);
-        assertThrows(IllegalStateException.class, () -> manager.createTask(task2));
+        assertThrows(IllegalArgumentException.class, () -> manager.createTask(task2));
     }
 
     @Test

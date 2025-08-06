@@ -8,12 +8,7 @@ public class InMemoryTaskManager implements TaskManager {
     protected final Map<Integer, Epic> epics = new HashMap<>();
     protected final Map<Integer, SubTask> subtasks = new HashMap<>();
     protected final HistoryManager historyManager;
-    protected final Set<Task> prioritizedTasks = new TreeSet<>(
-            Comparator.comparing(
-                    Task::getStartTime,
-                    Comparator.nullsLast(Comparator.naturalOrder())
-            ).thenComparingInt(Task::getId)
-    );
+    protected final List<Task> prioritizedTasks = new ArrayList<>();
 
     public InMemoryTaskManager(HistoryManager historyManager) {
         this.historyManager = historyManager;
@@ -270,17 +265,16 @@ public class InMemoryTaskManager implements TaskManager {
     protected void addToPrioritizedTasks(Task task) {
         if (task.getStartTime() != null) {
             prioritizedTasks.add(task);
+            prioritizedTasks.sort(Comparator.comparing(Task::getStartTime));
         }
     }
 
     protected void removeFromPrioritizedTasks(Task task) {
-        if (task != null) {
-            prioritizedTasks.remove(task);
-        }
+        prioritizedTasks.remove(task);
     }
 
-    protected Set<Task> getPrioritizedTasksSet() {
-        return Collections.unmodifiableSet(prioritizedTasks);
+    protected List<Task> getPrioritizedTasksList() {
+        return Collections.unmodifiableList(prioritizedTasks);
     }
 
     private void validateTaskTime(Task newTask) {
@@ -288,10 +282,8 @@ public class InMemoryTaskManager implements TaskManager {
             return;
         }
 
-        for (Task existingTask : getPrioritizedTasksSet()) {
+        for (Task existingTask : getPrioritizedTasksList()) {
             if (existingTask.getId() != newTask.getId() &&
-                    existingTask.getStartTime() != null &&
-                    existingTask.getDuration() != null &&
                     isTimeOverlapping(newTask, existingTask)) {
                 throw new IllegalStateException(
                         "Задача пересекается по времени с существующей задачей: " +
@@ -302,10 +294,6 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     private boolean isTimeOverlapping(Task task1, Task task2) {
-        if (task1.getStartTime() == null || task2.getStartTime() == null) {
-            return false;
-        }
-
         LocalDateTime start1 = task1.getStartTime();
         LocalDateTime end1 = task1.getEndTime();
         LocalDateTime start2 = task2.getStartTime();

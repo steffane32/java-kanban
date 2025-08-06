@@ -39,6 +39,7 @@ class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskManager> {
     void shouldThrowWhenFileInvalid() {
         File invalid = new File("nonexistent/path/tasks.csv");
         assertThrows(IllegalArgumentException.class,
-                () -> FileBackedTaskManager.loadFromFile(invalid, Managers.getDefaultHistory()));
+                () -> FileBackedTaskManager.loadFromFile(invalid, Managers.getDefaultHistory()),
+                "Ожидалось IllegalArgumentException при попытке загрузить из несуществующего файла");
     }
 }

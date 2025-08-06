@@ -17,7 +17,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
     public static FileBackedTaskManager loadFromFile(File file, HistoryManager historyManager) {
         if (!file.exists()) {
-            throw new RuntimeException("Файл не существует: " + file.getPath());
+            throw new IllegalArgumentException("Файл не существует: " + file.getPath());
         }
 
         try {
