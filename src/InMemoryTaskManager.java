@@ -1,4 +1,4 @@
-//import java.time.Duration;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -148,7 +148,7 @@ public class InMemoryTaskManager implements TaskManager {
     public SubTask createSubtask(SubTask subtask) {
         int epicId = subtask.getEpicId();
         if (!epics.containsKey(epicId)) {
-            return null;
+            throw new IllegalArgumentException("Эпик с id=" + epicId + " не существует");
         }
         validateTaskTime(subtask);
         subtask.setId(nextId++);
@@ -268,7 +268,6 @@ public class InMemoryTaskManager implements TaskManager {
         epic.updateTimings(subtasksList);
     }
 
-
     protected void addToPrioritizedTasks(Task task) {
         if (task.getStartTime() != null) {
             prioritizedTasks.add(task);
@@ -295,9 +294,10 @@ public class InMemoryTaskManager implements TaskManager {
                     existingTask.getStartTime() != null &&
                     existingTask.getDuration() != null &&
                     isTimeOverlapping(newTask, existingTask)) {
-                throw new ManagerSaveException(
-                        "Задача пересекается по времени с существующей задачей",
-                        new IllegalStateException("Временной конфликт между задачами")
+                throw new IllegalStateException(
+                        "Задача пересекается по времени с существующей задачей: " +
+                                "Новая задача: " + newTask +
+                                ", Существующая задача: " + existingTask
                 );
             }
         }
