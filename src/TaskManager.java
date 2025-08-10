@@ -1,6 +1,7 @@
 import java.util.List;
 
 public interface TaskManager {
+
     // Методы для Task
     List<Task> getAllTasks();
 
@@ -14,9 +15,8 @@ public interface TaskManager {
 
     void deleteTaskById(int id);
 
-    void clearAll();
-    // Методы для Epic
 
+    // Методы для Epic
     List<Epic> getAllEpics();
 
     void deleteAllEpics();
@@ -28,6 +28,7 @@ public interface TaskManager {
     void updateEpic(Epic epic);
 
     void deleteEpicById(int id);
+
 
     // Методы для SubTask
     List<SubTask> getAllSubtasks();
@@ -42,10 +43,13 @@ public interface TaskManager {
 
     void deleteSubtaskById(int id);
 
-    // Общие методы
+
+    // Дополнительные методы
     List<SubTask> getSubtasksForEpic(int epicId);
 
-    // Метод просмотра истории
     List<Task> getHistory();
 
+    List<Task> getPrioritizedTasks();
+
+    void clearAll();
 }
