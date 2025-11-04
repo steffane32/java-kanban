@@ -1,16 +1,14 @@
-import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpExchange;
-import com.google.gson.JsonObject;
 import com.google.gson.Gson;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-public class EpicsHandler extends BaseHttpHandler implements HttpHandler {
+public class EpicsHandler extends BaseHttpHandler {
     private final TaskManager taskManager;
-    private final Gson gson = new Gson();
 
-    public EpicsHandler(TaskManager taskManager) {
+    public EpicsHandler(TaskManager taskManager, Gson gson) {
+        super(gson);
         this.taskManager = taskManager;
     }
 
@@ -21,7 +19,7 @@ public class EpicsHandler extends BaseHttpHandler implements HttpHandler {
             String path = exchange.getRequestURI().getPath();
 
             if (path.matches("/epics/\\d+")) {
-                int id = Integer.parseInt(path.substring(7)); // "/epics/".length() = 6
+                int id = Integer.parseInt(path.substring(7));
 
                 switch (method) {
                     case "GET":
@@ -54,45 +52,16 @@ public class EpicsHandler extends BaseHttpHandler implements HttpHandler {
 
     private void handleGetAllEpics(HttpExchange exchange) throws IOException {
         List<Epic> epics = taskManager.getAllEpics();
-
-        StringBuilder jsonBuilder = new StringBuilder("[");
-        for (int i = 0; i < epics.size(); i++) {
-            Epic epic = epics.get(i);
-            jsonBuilder.append(String.format(
-                    "{\"id\":%d,\"name\":\"%s\",\"description\":\"%s\",\"status\":\"%s\"}",
-                    epic.getId(),
-                    epic.getName().replace("\"", "\\\""),
-                    epic.getDescription().replace("\"", "\\\""),
-                    epic.getStatus()
-            ));
-            if (i < epics.size() - 1) {
-                jsonBuilder.append(",");
-            }
-        }
-        jsonBuilder.append("]");
-
-        sendText(exchange, jsonBuilder.toString());
+        String jsonResponse = gson.toJson(epics);
+        sendText(exchange, jsonResponse);
     }
 
     private void handleCreateEpic(HttpExchange exchange) throws IOException {
         try {
             String body = new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
-            JsonObject jsonObject = gson.fromJson(body, JsonObject.class);
-
-            String name = jsonObject.get("name").getAsString();
-            String description = jsonObject.get("description").getAsString();
-            Status status = Status.valueOf(jsonObject.get("status").getAsString());
-
-            Epic newEpic = new Epic(0, name, description, status);
+            Epic newEpic = gson.fromJson(body, Epic.class);
             Epic createdEpic = taskManager.createEpic(newEpic);
-
-            String responseJson = String.format(
-                    "{\"id\":%d,\"name\":\"%s\",\"description\":\"%s\",\"status\":\"%s\"}",
-                    createdEpic.getId(),
-                    createdEpic.getName().replace("\"", "\\\""),
-                    createdEpic.getDescription().replace("\"", "\\\""),
-                    createdEpic.getStatus()
-            );
+            String responseJson = gson.toJson(createdEpic);
 
             byte[] resp = responseJson.getBytes(StandardCharsets.UTF_8);
             exchange.getResponseHeaders().add("Content-Type", "application/json;charset=utf-8");
@@ -111,13 +80,7 @@ public class EpicsHandler extends BaseHttpHandler implements HttpHandler {
             return;
         }
 
-        String jsonResponse = String.format(
-                "{\"id\":%d,\"name\":\"%s\",\"description\":\"%s\",\"status\":\"%s\"}",
-                epic.getId(),
-                epic.getName().replace("\"", "\\\""),
-                epic.getDescription().replace("\"", "\\\""),
-                epic.getStatus()
-        );
+        String jsonResponse = gson.toJson(epic);
         sendText(exchange, jsonResponse);
     }
 
@@ -129,6 +92,19 @@ public class EpicsHandler extends BaseHttpHandler implements HttpHandler {
         }
 
         taskManager.deleteEpicById(id);
-        sendText(exchange, "{\"message\":\"Эпик с id=" + id + " удалена\"}");
+        String responseJson = gson.toJson(new MessageResponse("Эпик с id=" + id + " удалена"));
+        sendText(exchange, responseJson);
+    }
+
+    private static class MessageResponse {
+        private final String message;
+
+        public MessageResponse(String message) {
+            this.message = message;
+        }
+
+        public String getMessage() {
+            return message;
+        }
     }
 }

@@ -1,13 +1,25 @@
+import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpExchange;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import com.google.gson.Gson;
+import java.time.Duration;
+import java.time.LocalDateTime;
 
-public class BaseHttpHandler {
-    protected final Gson gson = new GsonBuilder()
-            .serializeNulls()
-            .create();
+public abstract class BaseHttpHandler implements HttpHandler {
+    protected final Gson gson;
+
+    public BaseHttpHandler(Gson gson) {
+        this.gson = gson;
+    }
+
+    public BaseHttpHandler() {
+        this.gson = new GsonBuilder()
+                .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
+                .registerTypeAdapter(Duration.class, new DurationAdapter())
+                .create();
+    }
 
     protected void sendText(HttpExchange h, String text) throws IOException {
         byte[] resp = text.getBytes(StandardCharsets.UTF_8);

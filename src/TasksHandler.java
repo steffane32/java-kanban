@@ -1,16 +1,14 @@
-import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpExchange;
-import com.google.gson.JsonObject;
 import com.google.gson.Gson;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-public class TasksHandler extends BaseHttpHandler implements HttpHandler {
+public class TasksHandler extends BaseHttpHandler {
     private final TaskManager taskManager;
-    private final Gson gson = new Gson();
 
-    public TasksHandler(TaskManager taskManager) {
+    public TasksHandler(TaskManager taskManager, Gson gson) {
+        super(gson);
         this.taskManager = taskManager;
     }
 
@@ -20,10 +18,8 @@ public class TasksHandler extends BaseHttpHandler implements HttpHandler {
             String method = exchange.getRequestMethod();
             String path = exchange.getRequestURI().getPath();
 
-            // Проверяем, есть ли ID в пути (формат: /tasks/123)
             if (path.matches("/tasks/\\d+")) {
-                // Извлекаем ID из пути
-                int id = Integer.parseInt(path.substring(7)); // "/tasks/".length() = 7
+                int id = Integer.parseInt(path.substring(7));
 
                 switch (method) {
                     case "GET":
@@ -36,7 +32,6 @@ public class TasksHandler extends BaseHttpHandler implements HttpHandler {
                         sendNotFound(exchange, "Метод не поддерживается: " + method);
                 }
             } else if (path.equals("/tasks")) {
-                // Обработка пути /tasks (без ID)
                 switch (method) {
                     case "GET":
                         handleGetAllTasks(exchange);
@@ -56,61 +51,25 @@ public class TasksHandler extends BaseHttpHandler implements HttpHandler {
     }
 
     private void handleGetAllTasks(HttpExchange exchange) throws IOException {
-        // Получаем все задачи из менеджера
         List<Task> tasks = taskManager.getAllTasks();
-
-        // Создаем упрощённый JSON массив вручную
-        StringBuilder jsonBuilder = new StringBuilder("[");
-        for (int i = 0; i < tasks.size(); i++) {
-            Task task = tasks.get(i);
-            jsonBuilder.append(String.format(
-                    "{\"id\":%d,\"name\":\"%s\",\"description\":\"%s\",\"status\":\"%s\"}",
-                    task.getId(),
-                    task.getName().replace("\"", "\\\""),
-                    task.getDescription().replace("\"", "\\\""),
-                    task.getStatus()
-            ));
-            if (i < tasks.size() - 1) {
-                jsonBuilder.append(",");
-            }
-        }
-        jsonBuilder.append("]");
-
-        String jsonResponse = jsonBuilder.toString();
+        String jsonResponse = gson.toJson(tasks);
         sendText(exchange, jsonResponse);
     }
 
     private void handleCreateTask(HttpExchange exchange) throws IOException {
-        // Читаем тело запроса
-        String body = new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
+        try {
+            String body = new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
+            Task newTask = gson.fromJson(body, Task.class);
+            Task createdTask = taskManager.createTask(newTask);
+            String responseJson = gson.toJson(createdTask);
 
-        // Используем JsonObject чтобы вытащить только нужные поля
-        JsonObject jsonObject = gson.fromJson(body, JsonObject.class);
-
-        String name = jsonObject.get("name").getAsString();
-        String description = jsonObject.get("description").getAsString();
-        Status status = Status.valueOf(jsonObject.get("status").getAsString());
-
-        // Создаем задачу через конструктор (без времени)
-        Task newTask = new Task(name, description, status);
-
-        // Создаем задачу через менеджер
-        Task createdTask = taskManager.createTask(newTask);
-
-        // Создаем упрощённый JSON ответ вручную (без полей времени)
-        String responseJson = String.format(
-                "{\"id\":%d,\"name\":\"%s\",\"description\":\"%s\",\"status\":\"%s\"}",
-                createdTask.getId(),
-                createdTask.getName().replace("\"", "\\\""),
-                createdTask.getDescription().replace("\"", "\\\""),
-                createdTask.getStatus()
-        );
-
-        // Отправляем ответ с кодом 201
-        byte[] resp = responseJson.getBytes(StandardCharsets.UTF_8);
-        exchange.getResponseHeaders().add("Content-Type", "application/json;charset=utf-8");
-        exchange.sendResponseHeaders(201, resp.length);
-        exchange.getResponseBody().write(resp);
+            byte[] resp = responseJson.getBytes(StandardCharsets.UTF_8);
+            exchange.getResponseHeaders().add("Content-Type", "application/json;charset=utf-8");
+            exchange.sendResponseHeaders(201, resp.length);
+            exchange.getResponseBody().write(resp);
+        } catch (Exception e) {
+            sendInternalError(exchange, "Ошибка создания задачи: " + e.getMessage());
+        }
         exchange.close();
     }
 
@@ -121,13 +80,7 @@ public class TasksHandler extends BaseHttpHandler implements HttpHandler {
             return;
         }
 
-        String jsonResponse = String.format(
-                "{\"id\":%d,\"name\":\"%s\",\"description\":\"%s\",\"status\":\"%s\"}",
-                task.getId(),
-                task.getName().replace("\"", "\\\""),
-                task.getDescription().replace("\"", "\\\""),
-                task.getStatus()
-        );
+        String jsonResponse = gson.toJson(task);
         sendText(exchange, jsonResponse);
     }
 
@@ -139,6 +92,19 @@ public class TasksHandler extends BaseHttpHandler implements HttpHandler {
         }
 
         taskManager.deleteTaskById(id);
-        sendText(exchange, "{\"message\":\"Задача с id=" + id + " удалена\"}");
+        String responseJson = gson.toJson(new MessageResponse("Задача с id=" + id + " удалена"));
+        sendText(exchange, responseJson);
+    }
+
+    private static class MessageResponse {
+        private final String message;
+
+        public MessageResponse(String message) {
+            this.message = message;
+        }
+
+        public String getMessage() {
+            return message;
+        }
     }
 }

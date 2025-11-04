@@ -1,16 +1,14 @@
-import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpExchange;
-import com.google.gson.JsonObject;
 import com.google.gson.Gson;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-public class SubtasksHandler extends BaseHttpHandler implements HttpHandler {
+public class SubtasksHandler extends BaseHttpHandler {
     private final TaskManager taskManager;
-    private final Gson gson = new Gson();
 
-    public SubtasksHandler(TaskManager taskManager) {
+    public SubtasksHandler(TaskManager taskManager, Gson gson) {
+        super(gson);
         this.taskManager = taskManager;
     }
 
@@ -20,10 +18,8 @@ public class SubtasksHandler extends BaseHttpHandler implements HttpHandler {
             String method = exchange.getRequestMethod();
             String path = exchange.getRequestURI().getPath();
 
-            // Проверяем, есть ли ID в пути (формат: /subtasks/123)
             if (path.matches("/subtasks/\\d+")) {
-                // Извлекаем ID из пути
-                int id = Integer.parseInt(path.substring(10)); // "/subtasks/".length() = 10
+                int id = Integer.parseInt(path.substring(10));
 
                 switch (method) {
                     case "GET":
@@ -36,7 +32,6 @@ public class SubtasksHandler extends BaseHttpHandler implements HttpHandler {
                         sendNotFound(exchange, "Метод не поддерживается: " + method);
                 }
             } else if (path.equals("/subtasks")) {
-                // Обработка пути /subtasks (без ID)
                 switch (method) {
                     case "GET":
                         handleGetAllSubtasks(exchange);
@@ -56,61 +51,18 @@ public class SubtasksHandler extends BaseHttpHandler implements HttpHandler {
     }
 
     private void handleGetAllSubtasks(HttpExchange exchange) throws IOException {
-        // Получаем все подзадачи из менеджера
         List<SubTask> subtasks = taskManager.getAllSubtasks();
-
-        // Создаем упрощённый JSON массив вручную
-        StringBuilder jsonBuilder = new StringBuilder("[");
-        for (int i = 0; i < subtasks.size(); i++) {
-            SubTask subtask = subtasks.get(i);
-            jsonBuilder.append(String.format(
-                    "{\"id\":%d,\"name\":\"%s\",\"description\":\"%s\",\"status\":\"%s\",\"epicId\":%d}",
-                    subtask.getId(),
-                    subtask.getName().replace("\"", "\\\""),
-                    subtask.getDescription().replace("\"", "\\\""),
-                    subtask.getStatus(),
-                    subtask.getEpicId()
-            ));
-            if (i < subtasks.size() - 1) {
-                jsonBuilder.append(",");
-            }
-        }
-        jsonBuilder.append("]");
-
-        String jsonResponse = jsonBuilder.toString();
+        String jsonResponse = gson.toJson(subtasks);
         sendText(exchange, jsonResponse);
     }
 
     private void handleCreateSubtask(HttpExchange exchange) throws IOException {
         try {
-            // Читаем тело запроса
             String body = new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
-
-            // Используем JsonObject чтобы вытащить только нужные поля
-            JsonObject jsonObject = gson.fromJson(body, JsonObject.class);
-
-            String name = jsonObject.get("name").getAsString();
-            String description = jsonObject.get("description").getAsString();
-            Status status = Status.valueOf(jsonObject.get("status").getAsString());
-            int epicId = jsonObject.get("epicId").getAsInt();
-
-            // Создаем подзадачу через конструктор (без времени)
-            SubTask newSubtask = new SubTask(name, description, status, epicId);
-
-            // Создаем подзадачу через менеджер
+            SubTask newSubtask = gson.fromJson(body, SubTask.class);
             SubTask createdSubtask = taskManager.createSubtask(newSubtask);
+            String responseJson = gson.toJson(createdSubtask);
 
-            // Создаем упрощённый JSON ответ вручную
-            String responseJson = String.format(
-                    "{\"id\":%d,\"name\":\"%s\",\"description\":\"%s\",\"status\":\"%s\",\"epicId\":%d}",
-                    createdSubtask.getId(),
-                    createdSubtask.getName().replace("\"", "\\\""),
-                    createdSubtask.getDescription().replace("\"", "\\\""),
-                    createdSubtask.getStatus(),
-                    createdSubtask.getEpicId()
-            );
-
-            // Отправляем ответ с кодом 201
             byte[] resp = responseJson.getBytes(StandardCharsets.UTF_8);
             exchange.getResponseHeaders().add("Content-Type", "application/json;charset=utf-8");
             exchange.sendResponseHeaders(201, resp.length);
@@ -128,14 +80,7 @@ public class SubtasksHandler extends BaseHttpHandler implements HttpHandler {
             return;
         }
 
-        String jsonResponse = String.format(
-                "{\"id\":%d,\"name\":\"%s\",\"description\":\"%s\",\"status\":\"%s\",\"epicId\":%d}",
-                subtask.getId(),
-                subtask.getName().replace("\"", "\\\""),
-                subtask.getDescription().replace("\"", "\\\""),
-                subtask.getStatus(),
-                subtask.getEpicId()
-        );
+        String jsonResponse = gson.toJson(subtask);
         sendText(exchange, jsonResponse);
     }
 
@@ -147,6 +92,19 @@ public class SubtasksHandler extends BaseHttpHandler implements HttpHandler {
         }
 
         taskManager.deleteSubtaskById(id);
-        sendText(exchange, "{\"message\":\"Подзадача с id=" + id + " удалена\"}");
+        String responseJson = gson.toJson(new MessageResponse("Подзадача с id=" + id + " удалена"));
+        sendText(exchange, responseJson);
+    }
+
+    private static class MessageResponse {
+        private final String message;
+
+        public MessageResponse(String message) {
+            this.message = message;
+        }
+
+        public String getMessage() {
+            return message;
+        }
     }
 }
